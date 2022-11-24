@@ -32,6 +32,9 @@ def print_master(*objects, sep=' ', end='\n', file=sys.stdout, flush=False, prin
 def print_master_error(string):
     print(bcolors.BOLD + bcolors.FAIL + 'MASTER ERROR: ' + string + bcolors.ENDC)
 
+def print_master_warning(string):
+    print(bcolors.BOLD + bcolors.WARNING + 'MASTER WARNING: ' + string + bcolors.ENDC)
+
 # Check master camera setup
 # Params: cams
 def get_predefined_master_cam_sticker(cams):
@@ -177,7 +180,12 @@ def prepare_recording_command_lines(cams, master_cam_sticker):
         address = cc['address']
 
         if cam_sticker == master_cam_sticker:
-            master_cmd_line = f'--device {index} --external-sync Master --depth-delay {depth_delay} --depth-mode {depth_mode} --color-mode {color_mode} --rate {frame_rate} {exposure_setup} {stream_only_setup} {output_name} {ts_table_filename}'
+            if len(cams) > 1:
+                sync_mode = '--external-sync Master' 
+            else:
+                sync_mode = ''
+                print_master_warning('Only one camera is connected and recognized. Thus, "--external-sync" mode is not used.')
+            master_cmd_line = f'--device {index} {sync_mode} --depth-delay {depth_delay} --depth-mode {depth_mode} --color-mode {color_mode} --rate {frame_rate} {exposure_setup} {stream_only_setup} {output_name} {ts_table_filename}'
             master_address = address
             print_master('Master recording command:\n  ' + master_cmd_line)
         else:
