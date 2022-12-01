@@ -36,19 +36,19 @@ rm -rf $output_path
 for mkv_path in $(find $input_path -name '*.mkv' | sed 's,.*/,,' | sed  's,.mkv,,');
 	do
 
-	mkdir -p $output_path/$mkv_path/{color,depth}
+	mkdir -p $output_path/$mkv_path/{color,depth,ir}
 	#,point_cloud}
 	cp $input_path/$mkv_path'.csv' $output_path/$mkv_path/global_timestamps.csv
 
 	if [ $use_cpp_extractor = true ]; then
-		$IMAGES_EXTRACTOR_EXE       --mode 1 $input_path/$mkv_path'.mkv' $output_path/$mkv_path
+		$IMAGES_EXTRACTOR_EXE       --mode 0 --extract-ir-images 1 $input_path/$mkv_path'.mkv' $output_path/$mkv_path
 		$TIMESTAMPS_EXTRACTOR_EXE   $input_path/$mkv_path'.mkv' $output_path/$mkv_path
 		$IMU_DATA_EXTRACTOR_EXE     $input_path/$mkv_path'.mkv' $output_path/$mkv_path/imu.csv
 		$CALIB_PARAMS_EXTRACTOR_EXE $input_path/$mkv_path'.mkv' $output_path/$mkv_path/calib_params.json
 	else
 		ffmpeg -i $input_path/$mkv_path'.mkv' -map 0:0 -vsync 0 $output_path/$mkv_path/color/%d.png
 		ffmpeg -i $input_path/$mkv_path'.mkv' -map 0:1 -vsync 0 $output_path/$mkv_path/depth/%d.png
-		#ffmpeg -i $input_path/$mkv_path'.mkv' -map 0:2 -vsync 0 $output_path/$mkv_path/ir/%d.png
+		ffmpeg -i $input_path/$mkv_path'.mkv' -map 0:2 -vsync 0 $output_path/$mkv_path/ir/%d.png
 
 		$TIMESTAMPS_EXTRACTOR_EXE   $input_path/$mkv_path'.mkv' $output_path/$mkv_path
 		$IMU_DATA_EXTRACTOR_EXE     $input_path/$mkv_path'.mkv' $output_path/$mkv_path/imu.csv
